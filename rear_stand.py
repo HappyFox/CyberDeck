@@ -1,16 +1,20 @@
-import subprocess
+#! /usr/bin/env python3
 
-from solid import scad_render_to_file
+# autocmd BufWritePost rear_stand.py !python rear_stand.py
+
+
+import common
+
 from solid.objects import cylinder, sphere
 from solid.utils import up
 
-from common import PLY_THICKNESS, KEY_BOARD_STANDOFF, SEGMENTS
+from common import PLY_THICKNESS, KEY_BOARD_STANDOFF
 
-OUT_RAD = 10
-INNER_RAD = 5
-NUB_HEIGHT = 2
+OUT_RAD = 4.5
+INNER_RAD = 2.5
+NUB_HEIGHT = 1.65
 
-STAND_RAD = 15
+STAND_RAD = 20 / 2
 
 
 def assembly():
@@ -24,8 +28,4 @@ def assembly():
 
 
 if __name__ == "__main__":
-    a = assembly()
-    scad_render_to_file(
-        a, "stand.scad", file_header=f"$fn = {SEGMENTS};", include_orig_code=True
-    )
-    subprocess.run(["openscad", "stand.scad", "-o", "stand.stl"])
+    common.render_to_stl(assembly(), "stand")
