@@ -15,4 +15,4 @@ def render_to_stl(assembly, name):
         file_header=f"$fn = {SEGMENTS};",
         include_orig_code=True,
     )
-    subprocess.run(["openscad", "stand.scad", "-o", f"{name}.stl"])
+    subprocess.run(["openscad", f"{name}.scad", "-o", f"{name}.stl"])
