@@ -8,13 +8,23 @@ from pathlib import Path
 from solid.objects import projection, offset
 from solid.utils import down
 
-SEGMENTS = 64
+# SEGMENTS = 64
+SEGMENTS = 32
 
 PLY_THICKNESS = 3
 
-KERF = 0.125
+KERF = 0.2
 
 KEY_BOARD_STANDOFF = 9
+
+
+def make_rel_to_abs(list_):
+    ret = []
+    for idx, val in enumerate(list_):
+        if idx != 0:
+            val += ret[idx - 1]
+        ret.append(val)
+    return ret
 
 
 def render_to_stl(assembly, name):

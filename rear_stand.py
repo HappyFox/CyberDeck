@@ -17,8 +17,16 @@ NUB_HEIGHT = 1.65
 STAND_RAD = 20 / 2
 
 
+def get_base(add=0):
+    return cylinder(r=STAND_RAD, h=PLY_THICKNESS + add)
+
+
+def get_hole():
+    return get_base(add=0.1)
+
+
 def assembly():
-    stand = cylinder(r=STAND_RAD, h=PLY_THICKNESS)
+    stand = get_base()
 
     stand += up(PLY_THICKNESS)(cylinder(r=OUT_RAD, h=KEY_BOARD_STANDOFF))
 
