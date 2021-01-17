@@ -2,6 +2,9 @@
 
 # autocmd BufWritePost keyboard_case.py !python keyboard_case.py
 
+import logging
+
+
 import solid.objects
 
 import common
@@ -28,16 +31,26 @@ def get_peg_positions(z_delta):
     # yes I did record the x positions inverse to the way openscad does it.
 
     # Y postions
-    ys = [40.6, 38]
+    # ys = [40.6, 38]
 
-    ys = common.make_rel_to_abs(ys)
+    # ys = common.make_rel_to_abs(ys)
+
+    ys = [40.6, 78.6]
+
+    logging.info(f"the Y coords {ys}")
 
     # X positions
-    # these are from the left hand, and openscad is right handed. so will have
-    # to fix.
-    xs = [57.5, 45, 89, 76, 53, 62]
+    # xs = [57.5, 45, 89, 76, 53, 62]
+    # xs = [57.5, 102.5, 191.5, 267.5, 320.5, 382.5]
 
-    xs = common.make_rel_to_abs(xs)
+    # Guess 1: 0, +3, +2,
+    # xs = [57.5, 105.5, 193.5, 267.5, 320.5, 382.5]
+
+    # Guess 1: 0, +3, +2,
+    xs = [58.5, 105.5, 191.5, 267.5, 320.5, 382.5]
+    # xs = common.make_rel_to_abs(xs)
+
+    logging.info(f"the X coords {xs}")
 
     holes = []
     for x in xs:
@@ -46,7 +59,7 @@ def get_peg_positions(z_delta):
 
     # add that rando middle hole.
 
-    holes.append(translate((152, 60, z_delta))(peg.make_hole()))
+    holes.append(translate((154, 60, z_delta))(peg.make_hole()))
 
     # return solid.objects.union()(*holes)
     return holes
@@ -55,12 +68,13 @@ def get_peg_positions(z_delta):
 def assembly():
     case = cube([CASE_LEN, CASE_DEPTH, PLY_THICKNESS * 2])
     # case -= up(PLY_THICKNESS)(get_peg_positions())
-    rear_peg = translate((219, 101.6, PLY_THICKNESS))(rear_stand.get_hole())
+    rear_peg = translate((216, 101.6, PLY_THICKNESS))(rear_stand.get_hole())
     case = solid.objects.difference()(case, rear_peg, *get_peg_positions(PLY_THICKNESS))
 
     return case
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     common.render_to_stl(assembly(), "keyboard_case")
     common.render_to_dxfs(assembly(), "keyboard_case")
