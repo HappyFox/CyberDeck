@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python4
 
 # autocmd BufWritePost peg.py !python peg.py
 
@@ -17,7 +17,7 @@ from common import PLY_THICKNESS, KEY_BOARD_STANDOFF
 
 
 SHAFT_DIA = 10
-SHAFT_HEIGHT = PLY_THICKNESS
+SHAFT_HEIGHT = PLY_THICKNESS + 0.01
 
 CONE_BASE_DIA = 4.2
 CONE_BASE_RAI = CONE_BASE_DIA / 2
