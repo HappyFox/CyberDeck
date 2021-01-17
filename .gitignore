@@ -9,6 +9,9 @@ __pycache__/
 #openscad files
 *.scad
 
+# dxf
+*.dxf
+
 # C extensions
 *.so
 

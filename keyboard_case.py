@@ -5,7 +5,7 @@
 
 import common
 
-from solid.objects import cylinder, sphere, cube
+from solid.objects import cylinder, sphere, cube, projection
 from solid.utils import up, right, forward
 
 from common import PLY_THICKNESS, KEY_BOARD_STANDOFF
@@ -22,3 +22,4 @@ def assembly():
 
 if __name__ == "__main__":
     common.render_to_stl(assembly(), "keyboard_case")
+    # common.render_to_dxfs(assembly(), "keyboard_case")

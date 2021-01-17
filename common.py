@@ -1,10 +1,19 @@
 import subprocess
 
 import solid
+import solid.objects
+
+from pathlib import Path
+
+from solid.objects import projection, offset
+from solid.utils import down
 
 SEGMENTS = 64
 
 PLY_THICKNESS = 3
+
+KERF = 0.125
+
 KEY_BOARD_STANDOFF = 9
 
 
@@ -18,12 +27,32 @@ def render_to_stl(assembly, name):
     subprocess.run(["openscad", f"{name}.scad", "-o", f"{name}.stl"])
 
 
-def render_to_dxf(assembly, name, max_height):
+def render_to_dxfs(assembly, name):
 
+    proj_offset = PLY_THICKNESS / 2
+    idx = 1
 
-    solid.scad_render_to_file(
-        assembly,
-        f"{name}.scad",
-        file_header=f"$fn = {SEGMENTS};",
-        include_orig_code=True,
-    )
+    out_dir = Path.cwd() / f"{name}_dxfs"
+    out_dir.mkdir(exist_ok=True)
+
+    while True:
+        projection_assembly = solid.objects.offset(r=KERF / 2)(
+            solid.objects.projection(cut=True)(down(proj_offset)(assembly))
+        )
+        scad_file = out_dir / f"{name}_{idx}.scad"
+        dxf_file = out_dir / f"{name}_{idx}.dxf"
+
+        solid.scad_render_to_file(
+            projection_assembly,
+            scad_file,
+            file_header=f"$fn = {SEGMENTS};",
+            include_orig_code=True,
+        )
+
+        result = subprocess.run(["openscad", scad_file, "-o", dxf_file])
+
+        if result.returncode != 0:
+            break
+
+        proj_offset += PLY_THICKNESS
+        idx += 1
