@@ -17,6 +17,8 @@ KERF = 0.2
 
 KEY_BOARD_STANDOFF = 9
 
+MIL = 2.54
+
 
 def make_rel_to_abs(list_):
     ret = []

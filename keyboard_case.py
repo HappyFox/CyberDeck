@@ -26,6 +26,12 @@ CASE_WALL = 40
 CASE_LEN = KEY_BOARD_LEN  # + CASE_WALL
 CASE_DEPTH = KEY_BOARD_DEPTH  # + CASE_WALL
 
+CIRCUIT_PLAT_LEN = 90
+CIRCUIT_PLAT_LEN_INSET = 80
+
+CIRCUIT_PLAT_DEPTH = 45
+CIRCUIT_PLAT_DEPTH_INSET = 13
+
 
 def get_peg_positions(z_delta):
     # yes I did record the x positions inverse to the way openscad does it.
@@ -39,16 +45,7 @@ def get_peg_positions(z_delta):
 
     logging.info(f"the Y coords {ys}")
 
-    # X positions
-    # xs = [57.5, 45, 89, 76, 53, 62]
-    # xs = [57.5, 102.5, 191.5, 267.5, 320.5, 382.5]
-
-    # Guess 1: 0, +3, +2,
-    # xs = [57.5, 105.5, 193.5, 267.5, 320.5, 382.5]
-
-    # Guess 1: 0, +3, +2,
     xs = [58.5, 105.5, 191.5, 267.5, 320.5, 382.5]
-    # xs = common.make_rel_to_abs(xs)
 
     logging.info(f"the X coords {xs}")
 
@@ -61,15 +58,28 @@ def get_peg_positions(z_delta):
 
     holes.append(translate((154, 60, z_delta))(peg.make_hole()))
 
+    holes.append(translate((216, 101.6, PLY_THICKNESS))(rear_stand.get_hole()))
     # return solid.objects.union()(*holes)
     return holes
 
 
 def assembly():
     case = cube([CASE_LEN, CASE_DEPTH, PLY_THICKNESS * 2])
-    # case -= up(PLY_THICKNESS)(get_peg_positions())
-    rear_peg = translate((216, 101.6, PLY_THICKNESS))(rear_stand.get_hole())
-    case = solid.objects.difference()(case, rear_peg, *get_peg_positions(PLY_THICKNESS))
+    case += translate(
+        (
+            KEY_BOARD_LEN - CIRCUIT_PLAT_LEN_INSET,
+            KEY_BOARD_DEPTH - CIRCUIT_PLAT_DEPTH_INSET,
+            0,
+        )
+    )(
+        solid.objects.difference()(
+            cube([CIRCUIT_PLAT_LEN, CIRCUIT_PLAT_DEPTH, PLY_THICKNESS * 2]),
+            translate([3.5, 9, PLY_THICKNESS])(
+                cylinder(r=common.MIL, h=PLY_THICKNESS + 0.01)
+            ),
+        )
+    )
+    case = solid.objects.difference()(case, *get_peg_positions(PLY_THICKNESS))
 
     return case
 
