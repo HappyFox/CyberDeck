@@ -39,7 +39,7 @@ class Face(IntFlag):
         return cls.FRONT | cls.BACK | cls.LEFT | cls.RIGHT | cls.TOP | cls.BOTTOM
 
 
-def make_filted_cube(size, r=0, faces=Face.all()):
+def make_filleted_cube(size, r=0, faces=Face.all()):
 
     size = {LEN: size[0], DEPTH: size[1], HEIGHT: size[2]}
     center_size = {}
