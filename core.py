@@ -33,6 +33,7 @@ class CaseBuilder:
         self.corner_radius = 30
         self.wall_thickness = self.corner_radius
         self.hole_radius = 10
+        self.shelf_thickness = 15
 
         self.width = None
         self.depth = None
@@ -91,39 +92,39 @@ class CaseBuilder:
         wall_width = self.width / 2 - self.corner_radius
         wall_depth = self.depth / 2 - self.corner_radius
 
-        case += translate([wall_width, -wall_depth, 0])(
-            cube([self.wall_thickness, wall_depth * 2, self.height])
-        )
-        case += translate([-wall_width - self.corner_radius, -wall_depth, 0])(
-            cube([self.wall_thickness, wall_depth * 2, self.height])
-        )
+        wall_x_pos = self.width / 2 - self.wall_thickness / 2
+        wall_y_pos = self.depth / 2 - self.wall_thickness / 2
 
-        case += translate([-wall_width, wall_depth, 0])(
-            cube([wall_width * 2, self.wall_thickness, self.height])
-        )
+        offsets = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 
-        case += translate([-wall_width, -wall_depth - self.corner_radius, 0])(
-            cube([wall_width * 2, self.wall_thickness, self.height])
-        )
+        for x_off, y_off in offsets:
+            trans = [x_off * wall_x_pos, y_off * wall_y_pos, self.height / 2]
+
+            coords = [self.wall_thickness, wall_depth * 2, self.height]
+            if y_off:
+                coords = [wall_width * 2, self.wall_thickness, self.height]
+
+            case += translate(trans)(cube(coords, center=True))
 
         shelf_heights = self.get_shelves_height()
 
+        shelf_x_pos = self.width / 2 - self.wall_thickness - self.shelf_thickness / 2
+        shelf_y_pos = self.depth / 2 - self.wall_thickness - self.shelf_thickness / 2
+
         for shelf in shelf_heights:
-            case += translate([wall_width - self.wall_thickness, -wall_depth, shelf])(
-                cube([self.wall_thickness, wall_depth * 2, PLY_THICKNESS])
-            )
+            for x_off, y_off in offsets:
+                trans = [shelf_x_pos * x_off, shelf_y_pos * y_off, shelf]
+                coords = [self.shelf_thickness, wall_depth * 2, PLY_THICKNESS]
 
-            case += translate([-wall_width, -wall_depth, shelf])(
-                cube([self.wall_thickness, wall_depth * 2, PLY_THICKNESS])
-            )
+                if y_off:
+                    coords = [wall_width * 2, self.shelf_thickness, PLY_THICKNESS]
 
-            case += translate([-wall_width, wall_depth - self.wall_thickness, shelf])(
-                cube([wall_width * 2, self.wall_thickness, PLY_THICKNESS])
-            )
-
-            case += translate([-wall_width, -wall_depth, shelf])(
-                cube([wall_width * 2, self.wall_thickness, PLY_THICKNESS])
-            )
+                case += translate(trans)(
+                    cube(
+                        coords,
+                        center=True,
+                    )
+                )
 
         return case
 
@@ -162,7 +163,8 @@ def assembly():
     case.depth = CASE_DEPTH
     case.height = CASE_LAYERS * PLY_THICKNESS
 
-    case.wall_thickness = 45
+    case.wall_thickness = 15
+    case.shelf_thickness = 45
 
     case.width_mid_posts = True
     case.depth_mid_posts = True
