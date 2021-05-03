@@ -240,6 +240,10 @@ def make_filleted_cube(size, r=0, faces=Face.all()):
     return assembly
 
 
+def to_layer(val):
+    return (val / PLY_THICKNESS) * PLY_THICKNESS
+
+
 def make_rel_to_abs(list_):
     ret = []
     for idx, val in enumerate(list_):
