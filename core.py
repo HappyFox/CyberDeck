@@ -108,9 +108,17 @@ class CaseBuilder:
 
         shelf_heights = self.get_shelves_height()
 
-        shelf_x_pos = self.width / 2 - self.wall_thickness - self.shelf_thickness / 2
-        shelf_y_pos = self.depth / 2 - self.wall_thickness - self.shelf_thickness / 2
+        # shelf_x_pos = self.width / 2 - self.wall_thickness - self.shelf_thickness / 2
+        # shelf_y_pos = self.depth / 2 - self.wall_thickness - self.shelf_thickness / 2
 
+        for shelf in shelf_heights:
+
+            case += translate([0, 0, shelf])(
+                cube([wall_width * 2, self.depth - 0.1, PLY_THICKNESS], center=True),
+                cube([self.width - 0.1, wall_depth * 2, PLY_THICKNESS], center=True),
+            )
+
+        """ for partial shelves
         for shelf in shelf_heights:
             for x_off, y_off in offsets:
                 trans = [shelf_x_pos * x_off, shelf_y_pos * y_off, shelf]
@@ -125,6 +133,7 @@ class CaseBuilder:
                         center=True,
                     )
                 )
+            """
 
         return case
 
