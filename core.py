@@ -16,7 +16,7 @@ from solid.utils import up, right, forward, left, back, down
 from common import PLY_THICKNESS
 
 
-CASE_DEPTH = 300
+CASE_DEPTH = 350
 CASE_WIDTH = 400
 CASE_LAYERS = 40
 
@@ -167,20 +167,20 @@ class CaseBuilder:
 def assembly():
     # case = cube([CASE_LEN, CASE_DEPTH, PLY_THICKNESS * CASE_LAYERS])
 
-    case = CaseBuilder()
-    case.width = CASE_WIDTH
-    case.depth = CASE_DEPTH
-    case.height = CASE_LAYERS * PLY_THICKNESS
+    case_builder = CaseBuilder()
+    case_builder.width = CASE_WIDTH
+    case_builder.depth = CASE_DEPTH
+    case_builder.height = CASE_LAYERS * PLY_THICKNESS
 
-    case.wall_thickness = 15
-    case.shelf_thickness = 45
+    case_builder.wall_thickness = 15
+    case_builder.shelf_thickness = 45
 
-    case.width_mid_posts = True
-    case.depth_mid_posts = True
+    case_builder.width_mid_posts = True
+    case_builder.depth_mid_posts = True
 
-    case.shelves = [0.5]
+    case_builder.shelves = [0.5]
 
-    return case.build()
+    return case_builder.build()
 
 
 if __name__ == "__main__":

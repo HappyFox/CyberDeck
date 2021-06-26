@@ -13,49 +13,90 @@ import common
 from common import Face
 
 from solid import objects
-from solid.objects import cube, sphere, union, translate, cylinder
+from solid.objects import (
+    cube,
+    sphere,
+    union,
+    translate,
+    cylinder,
+    linear_extrude,
+    difference,
+    offset,
+    square,
+    hull,
+)
 
 
-SCREEN_HEIGHT = 74.76
-SCREEN_WIDTH = 140.4
+WALL_THICKNESS = 5  # Wall Thickness
+
+SCREEN_WIDTH = 74.76
+SCREEN_HEIGHT = 140.4
 SCREEN_CORNER_R = 4
 
-CASE_WALL = 10
+POCKET_SIZE = 50
+
 CASE_DEPTH = 40
-CASE_CORNER_R = 8
 
-DOUBLE_WALL = CASE_WALL * 2
 
-SCREEN_MOUNTS = [(9.661, 10.581), (53.67, 10.697), (9.458, 129.465), (68.506, 117.619)]
+SCREEN_MOUNTS = [
+    (16.75, 61.83),
+    (-30.65, 62.00),
+    (23.75, 39.75),
+    (-25.22, 39.91),
+    (23.83, -18.16),
+    (-25.40, -17.95),
+    (31.71, -48.21),
+    (-31.00, -60.08),
+]
 
 MOUNT_HOLE_SIZE_R = 3
 
 
-def assembly():
+def get_corner_pivots():
+    offset_reduction = SCREEN_CORNER_R * 2
+    width = (SCREEN_WIDTH - offset_reduction) / 2
+    height = (SCREEN_HEIGHT - offset_reduction) / 2
 
-    case = common.make_filleted_cube(
-        [SCREEN_HEIGHT + DOUBLE_WALL, SCREEN_WIDTH + DOUBLE_WALL, CASE_DEPTH],
-        r=CASE_CORNER_R,
-        faces=Face.FRONT | Face.BACK | Face.LEFT | Face.RIGHT | Face.TOP,
-    )
-    case -= translate([CASE_WALL, CASE_WALL, -0.01])(
-        common.make_filleted_cube(
-            [SCREEN_HEIGHT, SCREEN_WIDTH, CASE_DEPTH - CASE_WALL],
-            r=SCREEN_CORNER_R,
-            faces=Face.FRONT | Face.BACK | Face.LEFT | Face.RIGHT | Face.TOP,
+    coords = [
+        (-width, -height),
+        (width, -height),
+        (-width, height),
+        (width, height),
+    ]
+    return coords
+
+
+def screen_out_line():
+    offset_reduction = SCREEN_CORNER_R * 2
+    square_size = [SCREEN_WIDTH - offset_reduction, SCREEN_HEIGHT - offset_reduction]
+    return offset(r=SCREEN_CORNER_R)(square(square_size, center=True))
+
+def case_out_line():
+    return offset(r=WALL_THICKNESS)(screen_out_line()),
+
+
+def assembly():
+    case = linear_extrude(POCKET_SIZE)(
+        difference()(
+            case_out_line()
+            screen_out_line(),
         )
     )
+
+    coordinates = get_corner_pivots()
+
+    spheres = []
+    for coord in coordinates:
+        spheres.append(translate(coord)(sphere(SCREEN_CORNER_R + WALL_THICKNESS)))
+
+    case += solid.objects.hull()(spheres)
 
     mount_holes = []
     for x, y in SCREEN_MOUNTS:
-        hole = translate([x + CASE_WALL, y + CASE_WALL, 0])(
-            cylinder(r=MOUNT_HOLE_SIZE_R, h=CASE_DEPTH + 10)
-        )
+        hole = translate([x, y, -50])(cylinder(r=MOUNT_HOLE_SIZE_R, h=CASE_DEPTH + 600))
         mount_holes.append(hole)
 
     case = solid.objects.difference()(case, *mount_holes)
-    # case = solid.objects.union()(case, *mount_holes)
-
     return case
 
 
