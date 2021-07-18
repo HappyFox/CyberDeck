@@ -54,6 +54,7 @@ SCREEN_MOUNTS = [
 
 BUTTON_POS = (-0.55, -46.80)
 BUTTON_SIZE = 2.5
+BUTTON_GUIDE_HEIGHT = 30
 
 MOUNT_HOLE_SIZE_R = 1.5
 
@@ -130,15 +131,27 @@ def assembly():
     case += linear_extrude(floor_add)(case_out_line())
 
     mount_holes = []
+
     for x, y in SCREEN_MOUNTS:
-        hole = translate([x, y, -50])(cylinder(r=MOUNT_HOLE_SIZE_R, h=CASE_DEPTH + 600))
+        hole = translate([x, y])(
+            translate([0, 0, -50])(cylinder(r=MOUNT_HOLE_SIZE_R, h=CASE_DEPTH + 600)),
+            translate([0, 0, -case_radius - 6])(
+                cylinder(r=MOUNT_HOLE_SIZE_R * 2, h=case_radius)
+            ),
+        )
         mount_holes.append(hole)
 
     hole = translate([0, 0, -50])(cylinder(r=MOUNT_DIAM, h=CASE_DEPTH + 600))
     mount_holes.append(hole)
 
-    hole = translate([BUTTON_POS[0], BUTTON_POS[1], -50])(
-        cylinder(r=BUTTON_SIZE, h=CASE_DEPTH + 600)
+    hole = translate([BUTTON_POS[0], BUTTON_POS[1]])(
+        cylinder(r=BUTTON_SIZE * 2, h=BUTTON_GUIDE_HEIGHT),
+    )
+
+    # case += hole
+
+    hole = translate([BUTTON_POS[0], BUTTON_POS[1]])(
+        translate([0, 0 - 50])(cylinder(r=BUTTON_SIZE, h=CASE_DEPTH + 600)),
     )
     mount_holes.append(hole)
 
