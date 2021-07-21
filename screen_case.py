@@ -26,9 +26,16 @@ from solid.objects import (
     hull,
 )
 
+from solid.utils import up, down, left, right
 
-MOUNT_DIAM = 4.564
-DEPTH_FOR_MOUNT = 9
+
+MOUNT_RAD = 4.2
+DEPTH_FOR_MOUNT = 7.5
+MOUNT_HALF_SIZE = 6.38
+MOUNT_RETAINTER_W = 10
+MOUNT_RETAINTER_H = 5
+MOUNT_RETAINTER_L = 20
+
 
 WALL_THICKNESS = 5  # Wall Thickness
 
@@ -36,7 +43,7 @@ SCREEN_WIDTH = 74.8
 SCREEN_HEIGHT = 140.4
 SCREEN_CORNER_R = 4
 
-POCKET_SIZE = 36
+POCKET_SIZE = 34
 
 CASE_DEPTH = 40
 
@@ -54,14 +61,14 @@ SCREEN_MOUNTS = [
 
 BUTTON_POS = (-0.55, -46.80)
 BUTTON_SIZE = 2.5
-BUTTON_GUIDE_HEIGHT = 30
+BUTTON_GUIDE_HEIGHT = 17.5  # the length from floor to button is 27.5 so take 10
 
 MOUNT_HOLE_SIZE_R = 1.5
 
 
 HDMI_LEN = 23
 HDMI_WIDTH = 16
-HDMI_DEPTH = 9
+HDMI_DEPTH = 7.7  # 9
 
 
 USB_WIDTH = 12.2
@@ -94,8 +101,18 @@ def case_out_line():
 
 
 def hdmi_cutout():
+
+    CHANNEL_HEIGHT = 1
+    CHANNEL_WIDTH = 1.5
     rect = square([HDMI_WIDTH, HDMI_LEN])
-    return linear_extrude(HDMI_DEPTH)(rect)
+    body = linear_extrude(HDMI_DEPTH)(rect)
+    body += down(CHANNEL_HEIGHT)(cube([CHANNEL_WIDTH, HDMI_LEN, CHANNEL_HEIGHT + 0.1]))
+    body += down(CHANNEL_HEIGHT)(
+        right(HDMI_WIDTH - CHANNEL_WIDTH)(
+            (cube([CHANNEL_WIDTH, HDMI_LEN, CHANNEL_HEIGHT + 0.1]))
+        )
+    )
+    return body
 
 
 def usb_cutout():
@@ -103,9 +120,17 @@ def usb_cutout():
     return linear_extrude(USB_HEIGHT)(rect)
 
 
+def mount_shape():
+    rect = square([MOUNT_RETAINTER_L, MOUNT_RETAINTER_W], center=True)
+    return linear_extrude(MOUNT_RETAINTER_H)(rect)
+
+
 def assembly():
     case_radius = SCREEN_CORNER_R + WALL_THICKNESS
     floor_add = DEPTH_FOR_MOUNT - case_radius
+
+    if not floor_add:
+        floor_add = 0
 
     case = linear_extrude(POCKET_SIZE + floor_add)(
         difference()(
@@ -128,7 +153,11 @@ def assembly():
     floor_add = DEPTH_FOR_MOUNT - case_radius
     print(f"Need to have depth of {DEPTH_FOR_MOUNT}, adding {floor_add}")
 
-    case += linear_extrude(floor_add)(case_out_line())
+    if floor_add:
+        case += linear_extrude(floor_add)(case_out_line())
+
+    case += translate([0, MOUNT_HALF_SIZE + (MOUNT_RETAINTER_W / 2)])(mount_shape())
+    case += translate([0, -(MOUNT_HALF_SIZE + (MOUNT_RETAINTER_W / 2))])(mount_shape())
 
     mount_holes = []
 
@@ -141,17 +170,23 @@ def assembly():
         )
         mount_holes.append(hole)
 
-    hole = translate([0, 0, -50])(cylinder(r=MOUNT_DIAM, h=CASE_DEPTH + 600))
+    hole = translate([0, 0, -50])(cylinder(r=MOUNT_RAD, h=CASE_DEPTH + 600))
     mount_holes.append(hole)
 
-    hole = translate([BUTTON_POS[0], BUTTON_POS[1]])(
-        cylinder(r=BUTTON_SIZE * 2, h=BUTTON_GUIDE_HEIGHT),
+    guide = translate([BUTTON_POS[0], BUTTON_POS[1]])(
+        cylinder(r=BUTTON_SIZE * 2, h=BUTTON_GUIDE_HEIGHT)
     )
 
-    # case += hole
+    case += guide
+
+    button_hole = translate([BUTTON_POS[0], BUTTON_POS[1]])(
+        down(30)(cylinder(r=BUTTON_SIZE, h=BUTTON_GUIDE_HEIGHT + 60)),
+    )
+
+    case -= button_hole
 
     hole = translate([BUTTON_POS[0], BUTTON_POS[1]])(
-        translate([0, 0 - 50])(cylinder(r=BUTTON_SIZE, h=CASE_DEPTH + 600)),
+        translate([0, 0 - 50])(cylinder(r=BUTTON_SIZE, h=BUTTON_GUIDE_HEIGHT + 20)),
     )
     mount_holes.append(hole)
 
